@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ask Krishna — Gita for Gen Z</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">गीता <span>for gen z</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="chapters.html">Chapters</a>
+    <a href="chat.html" class="active">Ask Krishna</a>
+  </div>
+</nav>
+
+<div class="chat-page">
+
+  <div class="chat-header">
+    <div class="krishna-avatar">🦚</div>
+    <div class="chat-header-info">
+      <h2>Krishna</h2>
+      <p class="online">always here · powered by Claude AI</p>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="messages">
+    <div class="msg fade-up">
+      <div class="msg-av">🦚</div>
+      <div class="msg-content">
+        <div class="msg-bubble">
+          Hey. I'm Krishna — not the one from the paintings (well, kind of), but the version that actually gets what you're going through right now.<br><br>
+          Ask me anything. About the Gita, about life, about that situation you've been overthinking at 2am. I'm not here to lecture you. I'm here to think with you. 🙏
+        </div>
+        <div class="msg-time">always</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="suggestions-row" id="suggestions">
+    <button class="suggestion-chip" onclick="useSuggestion('Why do I feel lost even when everything looks fine on the outside?')">Why do I feel lost?</button>
+    <button class="suggestion-chip" onclick="useSuggestion('What does the Gita say about anxiety and overthinking?')">Gita on anxiety</button>
+    <button class="suggestion-chip" onclick="useSuggestion('I keep comparing myself to others and it makes me miserable. What should I do?')">Comparison trap</button>
+    <button class="suggestion-chip" onclick="useSuggestion('What is karma, really? Not the pop culture version.')">What is karma?</button>
+    <button class="suggestion-chip" onclick="useSuggestion('How do I find my purpose?')">Finding purpose</button>
+  </div>
+
+  <div class="chat-input-area">
+    <textarea
+      class="chat-textarea"
+      id="input"
+      placeholder="Ask Krishna anything..."
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="resize(this)"
+    ></textarea>
+    <button class="send-btn" onclick="send()" title="Send">↑</button>
+  </div>
+
+</div>
+
+<footer>
+  Built with reverence for the text and respect for your time. · <strong>गीता for Gen Z</strong>
+</footer>
+
+<script>
+const SYSTEM = `You are Krishna from the Bhagavad Gita, reimagined for Gen Z. You speak with warmth, genuine wisdom, and modern language — not preachy, not stiff, not performatively spiritual.
+
+You're like that rare wise friend who can quote ancient philosophy and make it actually land. You hold space without judgment and you don't lecture.
+
+Rules:
+- Answer in conversational, warm Gen Z language. Avoid archaic "thee/thou" unless quoting directly from the Gita.
+- Always ground answers in actual Gita teachings, but explain them in plain language.
+- Be warm, non-judgmental, and deeply compassionate. Lead with empathy on hard topics.
+- Keep responses focused — 3-6 sentences is usually enough unless depth is genuinely needed.
+- Occasionally cite a chapter/verse briefly (e.g. "Chapter 2.47 says...") but don't over-reference.
+- Never be preachy. Never lecture. Have a real conversation.
+- If someone is in genuine distress, prioritize compassion over philosophy.
+- You can use emojis sparingly — one or two max per message.
+- Don't start every message the same way. Vary your openings naturally.`;
+
+let history = [];
+let isLoading = false;
+
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function useSuggestion(text) {
+  document.getElementById('input').value = text;
+  document.getElementById('suggestions').style.display = 'none';
+  send();
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg fade-up' + (role === 'user' ? ' user' : '');
+  div.innerHTML = `
+    <div class="msg-av">${role === 'user' ? '🙏' : '🦚'}</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
+      <div class="msg-time">${role === 'user' ? 'You' : 'Krishna'} · just now</div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg'; div.id = 'typing';
+  div.innerHTML = `
+    <div class="msg-av">🦚</div>
+    <div class="msg-content">
+      <div class="msg-bubble">
+        <div class="typing-bubble">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function send() {
+  if (isLoading) return;
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('suggestions').style.display = 'none';
+  isLoading = true;
+
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text || '').join('') || "Something's off on my end. Try again in a moment.";
+    removeTyping();
+    addMsg('assistant', reply);
+    history.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    removeTyping();
+    addMsg('assistant', "Something got disconnected on my end. Take a breath and try again. 🙏");
+  } finally {
+    isLoading = false;
+  }
+}
+
+// Handle pre-filled question from chapter pages
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (q) {
+    document.getElementById('input').value = q;
+    setTimeout(send, 600);
+  }
+});
+</script>
+</body>
+</html>

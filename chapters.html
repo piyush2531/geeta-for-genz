@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>18 Chapters — Gita for Gen Z</title>
+  <link rel="stylesheet" href="css/style.css" />
+    <script src="js/chapters-data.js" defer></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">गीता <span>for gen z</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="chapters.html" class="active">Chapters</a>
+    <a href="chat.html">Ask Krishna</a>
+  </div>
+</nav>
+
+<div class="chapters-page">
+  <div class="page-head fade-up">
+    <div class="section-label">The complete guide</div>
+    <h1>18 Chapters</h1>
+    <p>Pick one. No prior knowledge needed. Start anywhere.</p>
+  </div>
+  <div class="chapter-grid" id="chapter-grid"></div>
+</div>
+
+<footer>
+  Built with reverence for the text and respect for your time. · <strong>गीता for Gen Z</strong>
+</footer>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    if (typeof CHAPTERS === "undefined") {
+      console.error("CHAPTERS not loaded");
+      return;
+    }
+
+    const grid = document.getElementById('chapter-grid');
+
+    CHAPTERS.forEach((ch, i) => {
+      const num = String(ch.num).padStart(2, '0');
+
+      grid.innerHTML += `
+        <a href="chapter.html?ch=${ch.num}" class="chapter-row fade-up" style="animation-delay:${i * 0.04}s">
+          <div class="chap-num">${num}</div>
+          <div class="chap-body">
+            <div class="chap-name">${ch.name}</div>
+            <div class="chap-sanskrit">${ch.sanskrit}</div>
+            <div class="chap-genz">${ch.genz}</div>
+          </div>
+          <div class="chap-arrow">›</div>
+        </a>
+      `;
+    });
+  });
+</script>
+</body>
+</html>

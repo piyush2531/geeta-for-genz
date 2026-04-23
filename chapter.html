@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter — Gita for Gen Z</title>
+  <link rel="stylesheet" href="css/style.css" />
+    <script src="js/chapters-data.js" ></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">गीता <span>for gen z</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="chapters.html">Chapters</a>
+    <a href="chat.html">Ask Krishna</a>
+  </div>
+</nav>
+
+<div class="chapter-detail fade-up" id="content">
+  <div style="text-align:center; padding:4rem; color:var(--muted);">Loading chapter...</div>
+</div>
+
+<footer>
+  Built with reverence for the text and respect for your time. · <strong>गीता for Gen Z</strong>
+</footer>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const chNum = parseInt(params.get('ch')) || 1;
+  const ch = CHAPTERS.find(c => c.num === chNum);
+  const container = document.getElementById('content');
+
+  if (!ch) {
+    container.innerHTML = `<a href="chapters.html" class="back-link">← Back to chapters</a><p>Chapter not found.</p>`;
+  } else {
+    document.title = `${ch.name} — Gita for Gen Z`;
+
+    const prev = chNum > 1 ? `<a href="chapter.html?ch=${chNum - 1}" class="btn btn-outline" style="font-size:13px;padding:8px 18px;">← Ch ${chNum - 1}</a>` : '';
+    const next = chNum < 18 ? `<a href="chapter.html?ch=${chNum + 1}" class="btn btn-saffron" style="font-size:13px;padding:8px 18px;">Ch ${chNum + 1} →</a>` : '';
+
+    const versesHTML = ch.verses.map(v => `
+      <div class="key-verse">
+        <div class="key-verse-ref">${v.ref}</div>
+        <div class="key-verse-text">"${v.text}"</div>
+        <div class="key-verse-modern">💬 ${v.modern}</div>
+      </div>
+    `).join('');
+
+    const tagsHTML = ch.themes.map(t => `<span class="theme-tag">${t}</span>`).join('');
+
+    container.innerHTML = `
+      <a href="chapters.html" class="back-link">← All chapters</a>
+
+      <div class="detail-chapter-num">CHAPTER ${String(ch.num).padStart(2, '0')}</div>
+      <div class="detail-title">${ch.name}</div>
+      <div class="detail-sanskrit">${ch.sanskrit}</div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">The Gen Z version</div>
+        <div class="detail-box highlight">${ch.genzExplain}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">What actually happens</div>
+        <div class="detail-box">${ch.summary}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">Key verse</div>
+        ${versesHTML}
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">Themes in this chapter</div>
+        <div class="theme-tags">${tagsHTML}</div>
+      </div>
+
+      <div class="ask-krishna-cta">
+        <p>Have questions about this chapter? Want to know how it applies to your life?</p>
+        <a href="chat.html?q=Tell me more about Chapter ${ch.num}: ${ch.name}" class="btn btn-saffron">Ask Krishna about this ✨</a>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:2rem; justify-content:space-between; align-items:center;">
+        <div>${prev}</div>
+        <a href="chapters.html" style="font-size:12px; color:var(--muted); text-decoration:none;">All 18 chapters</a>
+        <div>${next}</div>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>
